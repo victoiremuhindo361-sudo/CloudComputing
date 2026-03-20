@@ -1,57 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Résultat du vote</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Résultats du vote Cloud</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+        .vote-btn { background: blue; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; margin: 20px; border-radius: 5px; }
+        canvas { margin: 20px auto; max-width: 400px; }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>☁️ Sondage Cloud Computing</h1>
+        
+        <a href="VOTRE_LIEN_FORMULAIRE" class="vote-btn" target="_blank">
+            🗳️ CLIQUEZ ICI POUR VOTER
+        </a>
+        
+        <h2>Résultats :</h2>
+        <canvas id="monGraphique" width="400" height="400"></canvas>
+        <div id="statistiques">Chargement...</div>
+        <p id="heure"></p>
+    </div>
 
-<h2>Résultats du vote</h2>
-<canvas id="myChart"></canvas>
-
-<script>
-async function fetchData() {
-  const response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSsIzjztghlw1MyDjQHgzpUME_OR-jrF1GD7iNuUNMDlZ-Xr0-HgEvYw_Yv_4Q4L8PzInv0VK_7HWyv/pub?output=csv");
-  const data = await response.text();
-
-  const rows = data.split("\n").slice(1);
-  let votes = {};
-
-  rows.forEach(row => {
-    const cols = row.split(",");
-    const choix = cols[1]; // colonne réponse
-
-    if (choix) {
-      votes[choix] = (votes[choix] || 0) + 1;
-    }
-  });
-
-  return votes;
-}
-
-async function drawChart() {
-  const votes = await fetchData();
-
-  const ctx = document.getElementById('myChart');
-
-  new Chart(ctx, {
-    type: 'pie',
-    data: {
-      labels: Object.keys(votes),
-      datasets: [{
-        data: Object.values(votes)
-      }]
-    }
-  });
-}
-
-drawChart();
-
-// mise à jour automatique toutes les 10 secondes
-setInterval(() => {
-  location.reload();
-}, 10000);
-</script>
-
+    <script>
+        // REMPLACEZ PAR VOTRE LIEN CSV PUBLIC
+        const CSV_URL = "https://script.google.com/macros/s/AKfycbx6jAd9iqOomksdFq_lAmNtbDpFKJ-dXdU38SRYw4rKvOy_5rf0ozm5bczPYyoZo5h_/exec";
+        
+        let graphique;
+        
+        function compterVotes(donneesCSV) {
+            // Diviser les lignes
+            let lignes = donneesCSV.split("\n");
+            if (lignes.length < 2) return {};
+            
+            let votes = {};
+            
+            // Compter chaque vote (à partir de la ligne 1 pour ignorer l'en-tête)
+            for (let i = 1; i < lignes.length; i++) {
+                let colonnes = lignes[i].split(",");
+                if (colonnes.length > 1) {
+                    let reponse = colonnes[1]; // La colonne B contient les réponses
+                    if (reponse && reponse !== "") {
+                        votes[reponse] = (votes[reponse] || 0) + 1;
+                    }
+                }
+            }
+            return votes;
+        }
+        
+        function chargerResultats() {
+            fetch(CSV_URL)
+                .then(reponse => reponse.text())
+                .then(donnees => {
+                    let votes = compterVotes(donnees);
+                    let options = Object.keys(votes);
+                    let nombreVotes = Object.values(votes);
+                    let total = nombreVotes.reduce((a, b) => a + b, 0);
+                    
+                    // Afficher stats
+                    let statsHtml = "<h3>Détail :</h3>";
+                    for (let i = 0; i < options.length; i++) {
+                        let pourc = total > 0 ? ((nombreVotes[i] / total) * 100).toFixed(1) : 0;
+                        statsHtml += `<p>${options[i]} : ${nombreVotes[i]} vote(s) (${pourc}%)</p>`;
+                    }
+                    statsHtml += `<p><strong>Total : ${total} vote(s)</strong></p>`;
+                    document.getElementById("statistiques").innerHTML = statsHtml;
+                    
+                    // Graphique
+                    if (graphique) graphique.destroy();
+                    let ctx = document.getElementById('monGraphique').getContext('2d');
+                    graphique = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: options,
+                            datasets: [{
+                                data: nombreVotes,
+                                backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7']
+                            }]
+                        }
+                    });
+                    
+                    document.getElementById("heure").innerHTML = 
+                        "🔄 Dernière mise à jour : " + new Date().toLocaleTimeString();
+                })
+                .catch(erreur => {
+                    document.getElementById("statistiques").innerHTML = 
+                        "❌ Erreur : " + erreur.message;
+                });
+        }
+        
+        // Actualiser toutes les 5 secondes
+        setInterval(chargerResultats, 5000);
+        chargerResultats();
+    </script>
 </body>
 </html>
