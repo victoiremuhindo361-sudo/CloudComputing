@@ -1,99 +1,434 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Résultats du vote Cloud</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Élections 2026 - Résultats</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: Arial; text-align: center; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
-        .vote-btn { background: blue; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; margin: 20px; border-radius: 5px; }
-        canvas { margin: 20px auto; max-width: 400px;}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .vote-link-container {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .vote-btn {
+            background: white;
+            color: #1e3c72;
+            text-decoration: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .vote-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        /* Carte pour chaque poste */
+        .poste-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .poste-title {
+            font-size: 1.8rem;
+            color: #1e3c72;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 3px solid #1e3c72;
+            padding-bottom: 10px;
+        }
+        
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .chart-box h3 {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        
+        canvas {
+            max-height: 300px;
+            margin: 0 auto;
+        }
+        
+        .stats {
+            background: #f0f0f0;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .stat-value {
+            color: #1e3c72;
+            font-weight: bold;
+        }
+        
+        .total-votes {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .winner {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .winner-badge {
+            background: gold;
+            color: #333;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .update-time {
+            text-align: center;
+            margin-top: 30px;
+            color: white;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>☁️ Sondage Cloud Computing</h1>
+        <div class="header">
+            <h1>🗳️ Élections 2026</h1>
+            <p>Présidence • Secrétariat • Trésorerie</p>
+            <p style="font-size: 0.9rem;">Résultats en temps réel - Diagrammes en barres et camembert</p>
+        </div>
         
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdSGhFQJTK60RPmbETqPpINlNb0gRPc7l-PfATmnPw74wme9g/viewform?usp=publish-editor" class="vote-btn" target="_blank">
-            CLIQUEZ ICI POUR VOTER
-        </a>
+        <div class="vote-link-container">
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLSdSGhFQJTK60RPmbETqPpINlNb0gRPc7l-PfATmnPw74wme9g/viewform" class="vote-btn" target="_blank">
+                🗳️ CLIQUEZ ICI POUR VOTER
+            </a>
+        </div>
         
-        <h2>Résultats :</h2>
-        <canvas id="monGraphique" width="400" height="400"></canvas>
-        <div id="statistiques">Chargement...</div>
-        <p id="heure"></p>
+        <!-- Présidence -->
+        <div class="poste-card">
+            <h2 class="poste-title">👑 Présidence</h2>
+            <div class="charts-container">
+                <div class="chart-box">
+                    <h3>📊 Diagramme en barres</h3>
+                    <canvas id="barPresidence"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>🥧 Diagramme circulaire</h3>
+                    <canvas id="piePresidence"></canvas>
+                </div>
+            </div>
+            <div class="stats" id="statsPresidence">Chargement...</div>
+        </div>
+        
+        <!-- Secrétaire -->
+        <div class="poste-card">
+            <h2 class="poste-title">📝 Secrétaire</h2>
+            <div class="charts-container">
+                <div class="chart-box">
+                    <h3>📊 Diagramme en barres</h3>
+                    <canvas id="barSecretaire"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>🥧 Diagramme circulaire</h3>
+                    <canvas id="pieSecretaire"></canvas>
+                </div>
+            </div>
+            <div class="stats" id="statsSecretaire">Chargement...</div>
+        </div>
+        
+        <!-- Trésorier -->
+        <div class="poste-card">
+            <h2 class="poste-title">💰 Trésorier</h2>
+            <div class="charts-container">
+                <div class="chart-box">
+                    <h3>📊 Diagramme en barres</h3>
+                    <canvas id="barTresorier"></canvas>
+                </div>
+                <div class="chart-box">
+                    <h3>🥧 Diagramme circulaire</h3>
+                    <canvas id="pieTresorier"></canvas>
+                </div>
+            </div>
+            <div class="stats" id="statsTresorier">Chargement...</div>
+        </div>
+        
+        <div class="update-time" id="update-time">
+            🔄 Initialisation...
+        </div>
     </div>
-
+    
     <script>
-        // REMPLACEZ PAR VOTRE LIEN CSV PUBLIC
-        const CSV_URL = "https://script.google.com/macros/s/AKfycbw-jvaHGfET3rqDQ-F_9igbthhLQ2_HQ8ab5B0NtbOvRl74HiNiYsfYcaxWBERXukNO/exec";
+        // REMPLACEZ PAR VOTRE URL APPS SCRIPT
+        const APPS_SCRIPT_URL = 'https://script.googleusercontent.com/macros/echo?user_content_key=AWDtjMUgSzaoFTrgUb27oVT90TcV8kKz6OPoNhczSuQssLCBMYHRHZ5HoG4JeIn623zNqJFJahO--NpV8r2DxU848DJy8qqAxcekZXl87Ja45dmtkmLYanX5FNZHo0TiRIm8bus5WJWfJajjqTwk__rDnSUtyOJXkj_llrbUrGzm_0lFzrN6YAs9CNPfXDEZURMZXwLJzd3OaqQVAPw0W4l5WVzloxZgm9_W6nXgGkPlBFTl49ux9J-Wv4m8I9Me4ig0kji1ZXiUdP-0gvT_DfPowan_2uk9ow&lib=M6gBARB83w1fAMC0CzDoV9HA-nDy3ldf7';
+        const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdSGhFQJTK60RPmbETqPpINlNb0gRPc7l-PfATmnPw74wme9g/viewform';
         
-        let graphique;
+        let charts = {
+            barPresidence: null, piePresidence: null,
+            barSecretaire: null, pieSecretaire: null,
+            barTresorier: null, pieTresorier: null
+        };
         
-        function compterVotes(donneesCSV) {
-            // Diviser les lignes
-            let lignes = donneesCSV.split("\n");
-            if (lignes.length < 2) return {};
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#FF9F4A'];
+        
+        function createCharts(canvasBarId, canvasPieId, data, total) {
+            const ctxBar = document.getElementById(canvasBarId).getContext('2d');
+            const ctxPie = document.getElementById(canvasPieId).getContext('2d');
+            const labels = Object.keys(data);
+            const values = Object.values(data);
             
-            let votes = {};
+            // Détruire les graphiques existants
+            if (charts[canvasBarId]) charts[canvasBarId].destroy();
+            if (charts[canvasPieId]) charts[canvasPieId].destroy();
             
-            // Compter chaque vote (à partir de la ligne 1 pour ignorer l'en-tête)
-            for (let i = 1; i < lignes.length; i++) {
-                let colonnes = lignes[i].split(",");
-                if (colonnes.length > 1) {
-                    let reponse = colonnes[1]; // La colonne B contient les réponses
-                    if (reponse && reponse !== "") {
-                        votes[reponse] = (votes[reponse] || 0) + 1;
+            if (labels.length === 0) {
+                // Aucune donnée
+                charts[canvasBarId] = new Chart(ctxBar, {
+                    type: 'bar',
+                    data: { labels: ['Aucun vote'], datasets: [{ label: 'Votes', data: [0], backgroundColor: '#ccc' }] }
+                });
+                charts[canvasPieId] = new Chart(ctxPie, {
+                    type: 'pie',
+                    data: { labels: ['Aucun vote'], datasets: [{ data: [1], backgroundColor: ['#ccc'] }] }
+                });
+                return;
+            }
+            
+            // Diagramme en barres
+            charts[canvasBarId] = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Nombre de votes',
+                        data: values,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderRadius: 10,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let value = context.parsed.y;
+                                    let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${value} vote(s) (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 },
+                            title: { display: true, text: 'Nombre de votes' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Candidats' }
+                        }
                     }
                 }
-            }
-            return votes;
+            });
+            
+            // Diagramme circulaire (camembert)
+            charts[canvasPieId] = new Chart(ctxPie, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: 'white'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.parsed || 0;
+                                    let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} vote(s) (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
         
-        function chargerResultats() {
-            fetch(CSV_URL)
-                .then(reponse => reponse.text())
-                .then(donnees => {
-                    let votes = compterVotes(donnees);
-                    let options = Object.keys(votes);
-                    let nombreVotes = Object.values(votes);
-                    let total = nombreVotes.reduce((a, b) => a + b, 0);
-                    
-                    // Afficher stats
-                    let statsHtml = "<h3>Détail :</h3>";
-                    for (let i = 0; i < options.length; i++) {
-                        let pourc = total > 0 ? ((nombreVotes[i] / total) * 100).toFixed(1) : 0;
-                        statsHtml += `<p>${options[i]} : ${nombreVotes[i]} vote(s) (${pourc}%)</p>`;
-                    }
-                    statsHtml += `<p><strong>Total : ${total} vote(s)</strong></p>`;
-                    document.getElementById("statistiques").innerHTML = statsHtml;
-                    
-                    // Graphique
-                    if (graphique) graphique.destroy();
-                    let ctx = document.getElementById('monGraphique').getContext('2d');
-                    graphique = new Chart(ctx, {
-                        type: 'pie',
-                        data: {
-                            labels: options,
-                            datasets: [{
-                                data: nombreVotes,
-                                backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7']
-                            }]
-                        }
-                    });
-                    
-                    document.getElementById("heure").innerHTML = 
-                        "🔄 Dernière mise à jour : " + new Date().toLocaleTimeString();
-                })
-                .catch(erreur => {
-                    document.getElementById("statistiques").innerHTML = 
-                        "❌ Erreur : " + erreur.message;
-                });
+        function updateStats(containerId, data, total) {
+            const container = document.getElementById(containerId);
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+            
+            if (labels.length === 0) {
+                container.innerHTML = '<div style="text-align:center">📭 Aucun vote pour le moment</div>';
+                return;
+            }
+            
+            // Trouver le gagnant
+            let maxVotes = Math.max(...values);
+            let winner = labels[values.indexOf(maxVotes)];
+            
+            let html = '';
+            for (let i = 0; i < labels.length; i++) {
+                let percentage = total > 0 ? ((values[i] / total) * 100).toFixed(1) : 0;
+                let isWinner = labels[i] === winner;
+                html += `
+                    <div class="stat-item">
+                        <span class="stat-label">${isWinner ? '🏆 ' : ''}${labels[i]}</span>
+                        <span class="stat-value">${values[i]} vote(s) (${percentage}%)</span>
+                    </div>
+                `;
+            }
+            html += `<div class="total-votes">✅ Total: ${total} vote(s)</div>`;
+            
+            if (winner && maxVotes > 0) {
+                let winnerPct = ((maxVotes / total) * 100).toFixed(1);
+                html += `<div class="winner">
+                    <span class="winner-badge">🏆 EN TÊTE</span>
+                    <strong>${winner}</strong> avec ${maxVotes} vote(s) (${winnerPct}%)
+                </div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        async function fetchVoteData() {
+            try {
+                const response = await fetch(APPS_SCRIPT_URL);
+                if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
+                
+                const data = await response.json();
+                
+                if (data.error) throw new Error(data.error);
+                
+                // Données pour chaque poste
+                const pres = data.presidence || {};
+                const sec = data.secretaire || {};
+                const tres = data.tresorier || {};
+                
+                const totalPres = Object.values(pres).reduce((a,b) => a+b, 0);
+                const totalSec = Object.values(sec).reduce((a,b) => a+b, 0);
+                const totalTres = Object.values(tres).reduce((a,b) => a+b, 0);
+                
+                // Créer les graphiques
+                createCharts('barPresidence', 'piePresidence', pres, totalPres);
+                createCharts('barSecretaire', 'pieSecretaire', sec, totalSec);
+                createCharts('barTresorier', 'pieTresorier', tres, totalTres);
+                
+                // Mettre à jour les stats
+                updateStats('statsPresidence', pres, totalPres);
+                updateStats('statsSecretaire', sec, totalSec);
+                updateStats('statsTresorier', tres, totalTres);
+                
+                // Mettre à jour l'heure
+                const now = new Date();
+                document.getElementById('update-time').innerHTML = 
+                    `🔄 Dernière mise à jour: ${now.toLocaleTimeString('fr-FR')} | ` +
+                    `👑 ${totalPres} | 📝 ${totalSec} | 💰 ${totalTres} | Total: ${totalPres + totalSec + totalTres}`;
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('update-time').innerHTML = `❌ Erreur: ${error.message}`;
+            }
         }
         
         // Actualiser toutes les 5 secondes
-        setInterval(chargerResultats, 5000);
-        chargerResultats();
+        setInterval(fetchVoteData, 5000);
+        
+        // Charger une première fois
+        fetchVoteData();
     </script>
 </body>
 </html>
